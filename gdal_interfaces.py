@@ -1,5 +1,5 @@
 import gdal, osr
-from lazy import lazy
+from functools import lru_cache
 from pprint import pprint
 from os import listdir
 from os.path import isfile, join
@@ -46,7 +46,7 @@ class GDALInterface(object):
 
 
 
-    @lazy
+    @lru_cache(maxsize=None)
     def points_array(self):
         b = self.src.GetRasterBand(1)
         return b.ReadAsArray()
@@ -69,7 +69,7 @@ class GDALInterface(object):
             ylin = int(self.geo_transform_inv[4] * u + self.geo_transform_inv[5] * v)
 
             # look the value up
-            v = self.points_array[ylin, xpix]
+            v = self.points_array()[ylin, xpix]
 
             return v if v != -32768 else self.SEA_LEVEL
         except Exception as e:

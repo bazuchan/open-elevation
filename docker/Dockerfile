@@ -1,19 +1,14 @@
-FROM geodata/gdal:2.1.3
-
-ADD ./requirements.txt .
-
-RUN pip install -r requirements.txt
+FROM ubuntu:18.04
 
 RUN apt-get update
-
-RUN apt-get install -y libspatialindex-dev unar bc
+RUN apt-get install -y --no-install-recommends python3-gdal python3-rtree python3-bottle python3-gunicorn bc unrar
+RUN rm -f /var/cache/apt/archives/*.deb /var/lib/apt/lists/*.deb
 
 RUN mkdir /code
-
 ADD . /code/
 
 WORKDIR /code
 
-CMD python server.py
+CMD python3 server.py
 
 EXPOSE 8080
