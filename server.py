@@ -16,8 +16,9 @@ class InternalException(ValueError):
 """
 Initialize a global interface. This can grow quite large, because it has a cache.
 """
-interface = GDALTileInterface('data/', 'data/summary.json')
+interface = GDALTileInterface('data/', '/tmp/summary.json')
 interface.create_summary_json()
+app = bottle.Bottle()
 
 def get_elevation(lat, lng):
     """
@@ -42,7 +43,7 @@ def get_elevation(lat, lng):
     }
 
 
-@hook('after_request')
+@app.hook('after_request')
 def enable_cors():
     """
     Enable CORS support.
@@ -119,11 +120,11 @@ def do_lookup(get_locations_func):
 URL_ENDPOINT = '/api/v1/lookup'
 
 # For CORS
-@route(URL_ENDPOINT, method=['OPTIONS'])
+@app.route(URL_ENDPOINT, method=['OPTIONS'])
 def cors_handler():
     return {}
 
-@route(URL_ENDPOINT, method=['GET'])
+@app.route(URL_ENDPOINT, method=['GET'])
 def get_lookup():
     """
     GET method. Uses query_to_locations.
@@ -132,7 +133,7 @@ def get_lookup():
     return do_lookup(query_to_locations)
 
 
-@route(URL_ENDPOINT, method=['POST'])
+@app.route(URL_ENDPOINT, method=['POST'])
 def post_lookup():
     """
         GET method. Uses body_to_locations.
@@ -140,5 +141,5 @@ def post_lookup():
         """
     return do_lookup(body_to_locations)
 
-#run(host='0.0.0.0', port=8080)
-run(host='0.0.0.0', port=8080, server='gunicorn', workers=4)
+if __name__=='__main__':
+    app.run(host='0.0.0.0', port=8080)
